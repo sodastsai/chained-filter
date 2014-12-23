@@ -3,7 +3,7 @@ Pod::Spec.new do |s|
   s.name         = "STChainedFilter"
   s.version      = "0.0.1"
   s.summary      = "A CIFilter that chained other filters"
-  s.description  = "A CIFilter that chained other filters"
+  s.description  = "A CIFilter that chained other filters. Used to make multiple filters into one filter"
   s.homepage     = "https://github.com/sodastsai/chained-filter"
   s.license      = "Apache License 2.0"
   s.author       = { "sodastsai" => "sodas2002@gmail.com" }
