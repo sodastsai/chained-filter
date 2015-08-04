@@ -8,6 +8,26 @@
 
 #import "STChainedFilter.h"
 
+#pragma mark - Block filter
+
+@implementation STBlockFilter
+
+@synthesize inputBlock, inputImage;
+
++ (instancetype)blockFilterWithBlock:(CIImage *(^)(CIImage *))block {
+    STBlockFilter *filter = [[self alloc] init];
+    filter.inputBlock = block;
+    return filter;
+}
+
+- (CIImage *)outputImage {
+    return self.inputBlock(self.inputImage);
+}
+
+@end
+
+#pragma mark - Chained filter
+
 @implementation STChainedFilter
 
 @synthesize inputImage, inputFilters;
@@ -23,7 +43,7 @@
 
     NSMutableArray *newFilters = [[NSMutableArray alloc] initWithCapacity:[self.inputFilters count]];
     [self.inputFilters enumerateObjectsUsingBlock:^(CIFilter *filter, NSUInteger idx, BOOL *stop) {
-        [newFilters addObject:[filter copy]];
+        [newFilters addObject:[filter copyWithZone:zone]];
     }];
     chainFilter.inputFilters = [[NSArray alloc] initWithArray:newFilters];
 
@@ -32,13 +52,9 @@
 
 - (CIImage *)outputImage {
     CIImage *__block image = self.inputImage;
-    [self.inputFilters enumerateObjectsUsingBlock:^(id filter, NSUInteger idx, BOOL *stop) {
-        if ([filter isKindOfClass:[CIFilter class]]) {
-            [(CIFilter *)filter setValue:image forKey:kCIInputImageKey];
-            image = [(CIFilter *)filter valueForKey:kCIOutputImageKey];
-        } else {
-            image = ((STChainedFilterBlock)filter)(image);
-        }
+    [self.inputFilters enumerateObjectsUsingBlock:^(CIFilter * filter, NSUInteger idx, BOOL *stop) {
+        [filter setValue:image forKey:kCIInputImageKey];
+        image = [filter valueForKey:kCIOutputImageKey];
     }];
     return image;
 }

@@ -8,14 +8,30 @@
 
 #import <UIKit/UIKit.h>
 
-// Filters array should contain "CIFilter" or "STChainedFilterBlock" only.
+#if __has_feature(objc_generics)
+#define STGenerics(...) <__VA_ARGS__>
+#else
+#define STGenerics(...)
+#endif
+
+NS_ASSUME_NONNULL_BEGIN
+
+@interface STBlockFilter : CIFilter
+
++ (instancetype)blockFilterWithBlock:(CIImage *(^)(CIImage *))block;
+
+@property (nonatomic, strong) CIImage *inputImage;
+@property (nonatomic, copy) CIImage *(^inputBlock)(CIImage *);
+
+@end
+
 @interface STChainedFilter : CIFilter
 
-+ (instancetype)chainedFilterWithFilters:(NSArray *)filters;
++ (instancetype)chainedFilterWithFilters:(NSArray STGenerics(CIFilter *) *)filters;
 
-@property (nonatomic, strong) NSArray *inputFilters;
+@property (nonatomic, strong) NSArray STGenerics(CIFilter *) *inputFilters;
 @property (nonatomic, strong) CIImage *inputImage;
 
 @end
 
-typedef CIImage *(^STChainedFilterBlock)(CIImage *);
+NS_ASSUME_NONNULL_END
